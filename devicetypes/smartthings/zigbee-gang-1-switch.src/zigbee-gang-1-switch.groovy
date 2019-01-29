@@ -33,8 +33,8 @@ metadata {
             tileAttribute ("device.switch1", key: "PRIMARY_CONTROL") {
                 attributeState "on", label:'SW1', action:"off", icon:"st.switches.light.on", backgroundColor:"#00a0dc", nextState:"turningOff"
                 attributeState "off", label:'SW1', action:"on", icon:"st.switches.light.off", backgroundColor:"#ffffff", nextState:"turningOn"
-                attributeState "turningOn", label:'SW1', action:"off", icon:"st.switches.light.on", backgroundColor:"#00a0dc", nextState:"turningOff"
-                attributeState "turningOff", label:'SW1', action:"on", icon:"st.switches.light.off", backgroundColor:"#ffffff", nextState:"turningOn"
+                attributeState "turningOn", label:'SW1', action:"on", icon:"st.switches.light.on", backgroundColor:"#00a0dc", nextState:"off"
+                attributeState "turningOff", label:'SW1', action:"off", icon:"st.switches.light.off", backgroundColor:"#ffffff", nextState:"on"
             }
             tileAttribute("device.lastCheckin", key: "SECONDARY_CONTROL") {
                 attributeState("default", label:'Last Update: ${currentValue}',icon: "st.Health & Wellness.health9")
@@ -85,15 +85,17 @@ private Map parseCatchAllMessage(String description) {
     Map resultMap = [:]
     def cluster = zigbee.parse(description)
     log.debug cluster
-   
-    if (cluster.clusterId == 0x0006 && cluster.command == 0x01){
+    if (cluster.clusterId == 0x0006 && cluster.command == 0x0b){
         if (cluster.sourceEndpoint == 0x10) {
             log.debug "Its Switch one"
-            def onoff = cluster.data[-1]
+            log.debug cluster.data
+            def onoff = cluster.data[0]
             if (onoff == 1) {
+            	log.debug 'here1'
                 resultMap = createEvent(name: "switch1", value: "on")
             }
             else if (onoff == 0) {
+            	log.debug 'here2'
                 resultMap = createEvent(name: "switch1", value: "off")
             }
         }
